@@ -1,0 +1,26 @@
+
+python/glue/awsglue/*
+python/glue/venv/*
+*.log
+java/igniteClient/spring-shell.log
+*.log
+*.log
+*.log
+*.class
+scala/.idea/workspace.xml
+scala/.idea/workspace.xml
+target
+.idea/*.*
+.gradle/
+.idea/
+*.iml
+*.iws
+target/
+
+# IntellijIdea files
+*.iml
+.idea
+out
+java/general/Hello.pdf
+scalaNew/build/
+scala/sbt/generalscala/.bsp/sbt.json
