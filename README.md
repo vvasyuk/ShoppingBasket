@@ -21,11 +21,12 @@ Building & Running
 * Run the program:
 * sbt:shopping-basket> run PriceBasket Apples Milk Bread
 * you should see result as below
-sbt:shopping-basket> run PriceBasket Apples Milk Bread
-[info] running basket.Main PriceBasket Apples Milk Bread
-Subtotal: £3.10
-Apples 10% off: 10p
-Total price: £3.00
+sbt:shopping-basket> run PriceBasket Apples Milk Bread<br/>
+
+[info] running basket.Main PriceBasket Apples Milk Bread<br/>
+Subtotal: £3.10<br/>
+Apples 10% off: 10p<br/>
+Total price: £3.00<br/>
 
 Price List & Promotions modification
 --------
