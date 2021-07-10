@@ -34,7 +34,7 @@ object Basket{
     }
   }
 
-  def subTotalMessage(subTotal: Int): String = s"Subtotal: $subTotal\n"
+  def subTotalMessage(subTotal: Int): String = s"Subtotal: ${intToCur(subTotal)}\n"
 
   def discountMessage(discounts: List[Option[Discount]]): String = {
     if (discounts.forall(_ == None)){
@@ -42,12 +42,23 @@ object Basket{
     }else{
       discounts.foldLeft(new StringBuilder(""))((acc, el)=>{
         el match{
-          case Some(d) => acc.append(s"${d.product} ${d.percentage}% off: ${d.sum}\n")
+          case Some(d) => acc.append(s"${d.product} ${d.percentage}% off: ${intToCur(d.sum)}\n")
           case _ => acc
         }
       }).toString()
     }
   }
 
-  def totalMessage(total: Int): String = s"Total price: $total"
+  def totalMessage(total: Int): String = s"Total price: ${intToCur(total)}"
+
+  def intToCur(sum: Int): String = {
+    if (sum < 100){
+      s"${sum}p"
+    } else{
+      val intStr = sum.toString
+      val left = intStr.slice(0,intStr.size-2)
+      val right = intStr.slice(intStr.size-2,intStr.size)
+      s"£${left}.${right}"
+    }
+  }
 }

@@ -46,3 +46,5 @@ object Main {
     priceBasketReceiptProgram
   }
 }
+
+// TODO fix compilation warning

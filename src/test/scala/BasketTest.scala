@@ -1,5 +1,5 @@
 
-import basket.products.Basket.{SubTotal, discountMessage, getReceipt, getSubTotal, getTotal, subTotalMessage, totalMessage}
+import basket.products.Basket.{SubTotal, discountMessage, getReceipt, getSubTotal, getTotal, intToCur, subTotalMessage, totalMessage}
 import basket.products.{ConditionalPromotion, Discount, Promotion, SimplePromotion}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -23,7 +23,7 @@ class BasketTest extends AnyFlatSpec{
           discountMessage(promotions.map(_.memoizeGetDiscount(basket, priceList))) +
           totalMessage(getTotal(subTotal.sum, promotions.map(_.memoizeGetDiscount(basket, priceList))))
       })
-    assert(res == "Subtotal: 620\nApples 10% off: 20\nBread 50% off: 40\nTotal price: 560")
+    assert(res == "Subtotal: £6.20\nApples 10% off: 20p\nBread 50% off: 40p\nTotal price: £5.60")
   }
 
   "getReceipt" should "work fine without discounts" in {
@@ -36,7 +36,7 @@ class BasketTest extends AnyFlatSpec{
       (in, price) => {
         totalMessage(getTotal(getSubTotal(in,price).sum, List()))}
     )
-    assert(res == "Total price: 620")
+    assert(res == "Total price: £6.20")
   }
 
   "getSubTotal" should "work fine" in {
@@ -60,7 +60,7 @@ class BasketTest extends AnyFlatSpec{
   }
 
   "subTotalMessage" should "work fine" in {
-    assert(subTotalMessage(130) == "Subtotal: 130\n")
+    assert(subTotalMessage(130) == "Subtotal: £1.30\n")
   }
 
   "discountMessage" should "work fine and return no offers" in {
@@ -72,10 +72,18 @@ class BasketTest extends AnyFlatSpec{
   "discountMessage" should "work fine and return offers" in {
     val discounts = List(Some(Discount("Apples", 10, 10)), Some(Discount("Milk", 15, 15)), None)
     val res = discountMessage(discounts)
-    assert(res == "Apples 10% off: 10\nMilk 15% off: 15\n")
+    assert(res == "Apples 10% off: 10p\nMilk 15% off: 15p\n")
   }
 
   "totalMessage" should "work fine" in {
-    assert(totalMessage(130) == "Total price: 130")
+    assert(totalMessage(130) == "Total price: £1.30")
+  }
+
+  "intToCur" should "work fine" in {
+    assert(intToCur(310) == "£3.10")
+    assert(intToCur(10) == "10p")
+    assert(intToCur(300) == "£3.00")
+    assert(intToCur(350) == "£3.50")
+    assert(intToCur(299) == "£2.99")
   }
 }

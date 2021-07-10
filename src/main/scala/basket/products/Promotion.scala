@@ -12,7 +12,7 @@ sealed trait Promotion {
     val cache = collection.mutable.Map.empty[K, V]
     k =>
       cache.getOrElse(k, {
-        cache update(k, f(k))
+        cache.update(k, f(k))
         cache(k)
       })
   }

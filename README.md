@@ -2,7 +2,8 @@ Description
 -----------
 Program written in Scala that can price a basket of goods taking into account some special offers
 
-Building
+
+Building & Running
 --------
 
 ### Requirements
@@ -10,16 +11,18 @@ Building
 * Java 8+
 * SBT
 
-### Installation
+### Installation & Launch
 
 * clone repo
-* cd to root folder
-* sbt package
+* open cmd and cd to root folder of cloned repo (could be for example: ShoppingBasket)
+* run sbt command (it should load global plugins, project definition, settings for ShoppingBasket project)
+* after you see "sbt:shopping-basket>" command prompt - type: "package" as shown below
+* sbt:shopping-basket> package
+* Run the program:
+* sbt:shopping-basket> run PriceBasket Apples Milk Bread
+* you should see result as below
 
-### Run
-* cd to ShoppingBasket\target\scala-2.13
-* scala .\shopping-basket_2.13-0.1.0.jar PriceBasket Apples Milk Bread
 
-Usage
+Price List & Promotions modification
 --------
-One can modify priceList.csv, promotionsList.csv contained in jar file in order to update the price list of available products and promotions without recompiling the code.
+One can modify priceList.csv, promotionsList.csv contained in jar file (after package or simply in resource folder) in order to update the price list of available products and promotions without recompiling the code.
