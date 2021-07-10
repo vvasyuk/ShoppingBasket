@@ -17,6 +17,6 @@ class ReadWriteTest extends AnyFlatSpec {
 
   "fileToListImpure" should "work fine" in {
     val res = fileToListImpure("priceList.csv")
-    assert(res == List("product,price","Soup,65","Bread,80"))
+    assert(res == List("product,price", "Soup,65", "Bread,80", "Milk,130", "Apples,100", "Invalid,100,abc"))
   }
 }

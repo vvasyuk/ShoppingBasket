@@ -1,5 +1,5 @@
 
-import basket.products.Basket.{discountMessage, getReceipt, getSubTotal, getTotal, subTotalMessage, totalMessage}
+import basket.products.Basket.{SubTotal, discountMessage, getReceipt, getSubTotal, getTotal, subTotalMessage, totalMessage}
 import basket.products.{ConditionalPromotion, Discount, Promotion, SimplePromotion}
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -18,10 +18,11 @@ class BasketTest extends AnyFlatSpec{
       basket,
       priceList,
       (in, price) => {
-      subTotalMessage(getSubTotal(in,price)) +
-        discountMessage(promotions.map(_.memoizeGetDiscount(basket, priceList))) +
-        totalMessage(getTotal(getSubTotal(in,price), promotions.map(_.memoizeGetDiscount(basket, priceList))))
-    })
+        val subTotal = getSubTotal(in,price)
+        subTotalMessage(subTotal.sum) +
+          discountMessage(promotions.map(_.memoizeGetDiscount(basket, priceList))) +
+          totalMessage(getTotal(subTotal.sum, promotions.map(_.memoizeGetDiscount(basket, priceList))))
+      })
     assert(res == "Subtotal: 620\nApples 10% off: 20\nBread 50% off: 40\nTotal price: 560")
   }
 
@@ -32,7 +33,9 @@ class BasketTest extends AnyFlatSpec{
     val res = getReceipt(
       basket,
       priceList,
-      (in, price) => {totalMessage(getTotal(getSubTotal(in,price), List()))})
+      (in, price) => {
+        totalMessage(getTotal(getSubTotal(in,price).sum, List()))}
+    )
     assert(res == "Total price: 620")
   }
 
@@ -41,7 +44,7 @@ class BasketTest extends AnyFlatSpec{
     val priceList = Map("Soup" -> 65, "Bread" -> 80, "Milk" -> 130, "Apples" -> 100)
 
     val res = getSubTotal(basket, priceList)
-    assert(res == 620)
+    assert(res == SubTotal(620,List()))
   }
 
   "getTotal" should "work fine with discounts" in {

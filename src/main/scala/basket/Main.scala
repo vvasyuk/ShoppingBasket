@@ -9,46 +9,40 @@ import basket.products.Promotion
 
 
 object Main {
+
+  case class PriceBasketReceipt(priceListUsed: PriceMap, promotionsUsed: List[Promotion], receipt: String)
+
   def main(args: Array[String]): Unit = {
-    calculateBasket(args)
+    val receiptProgram = for {
+      priceBasket        <- calculateBasket(args)
+      receiptProgram     <- IO(new SimpleOutput().toConsole(priceBasket.receipt))
+    } yield receiptProgram
+
+    receiptProgram.unsafeRunSync()
   }
 
-  def calculateBasket(args: Array[String]): Unit = {
-    println(args.mkString(","))
-
-    // parse input
-    val basket = inputToMapCnt(Array("Apples", "Milk", "Bread", "Bread", "Apples", "Soup", "Soup"))
-    //    val basket = inputToMapCnt(Array("Apples", "Milk"))
-
-    case class PriceBasketReceipt(priceListUsed: PriceMap, promotionsUsed: List[Promotion], receipt: String)
+  def calculateBasket(args: Array[String]): IO[PriceBasketReceipt] = {
+    val basket = inputToMapCnt(args)
 
     val priceBasketReceiptProgram = for {
-      priceList        <- IO(fileToListImpure("priceList.csv"))
-      priceMapParsed   = csvToMapPrice(priceList.tail)
-      promotions       <- IO(fileToListImpure("promotionsList.csv"))
-      promotionsParsed = csvToPromotions(promotions)
+      priceList         <- IO(fileToListImpure("priceList.csv"))
+      priceMap          = csvToMapPrice(priceList.tail)
+      promotionsStrings <- IO(fileToListImpure("promotionsList.csv"))
+      promotions        = csvToPromotions(promotionsStrings)
 
-      receipt          = getReceipt(
+      receipt           = getReceipt(
         basket,
-        priceMapParsed,
+        priceMap.parsed,
         (in, price) => {
-          subTotalMessage(getSubTotal(in,price)) +
-            discountMessage(promotionsParsed.map(_.memoizeGetDiscount(basket, priceMapParsed))) +
-            totalMessage(getTotal(getSubTotal(in,price), promotionsParsed.map(_.memoizeGetDiscount(basket, priceMapParsed))))
+          val subTotal = getSubTotal(in,price)
+          val warnings = priceMap.invalid ::: promotions.invalid ::: subTotal.prodNotInPrice
+          subTotalMessage(subTotal.sum) +
+            discountMessage(promotions.parsed.map(_.memoizeGetDiscount(basket, priceMap.parsed))) +
+            totalMessage(getTotal(subTotal.sum, promotions.parsed.map(_.memoizeGetDiscount(basket, priceMap.parsed)))) +
+          "\n\n" + warnings.mkString("\n")
         }
       )
-      _                <-IO(new SimpleOutput().toConsole(receipt))
-    } yield PriceBasketReceipt(priceMapParsed, promotionsParsed, receipt)
-
-    val res = priceBasketReceiptProgram.unsafeRunSync()
-    //    println(s"input: $basket")
-    //    println(res.priceListUsed)
-    //    println(res.receipt)
+    } yield PriceBasketReceipt(priceMap.parsed, promotions.parsed, receipt)
+    priceBasketReceiptProgram
   }
 }
-
-// TODO rewrite csvToMapPrice
-// TODO rewrite csvToPromotions
-// TODO modify readme file
-// TODO make good types
-// TODO promotion without end date

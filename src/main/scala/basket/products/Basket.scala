@@ -9,12 +9,15 @@ object Basket{
     f(productList, priceList)
   }
 
-  def getSubTotal(productList: InputMap, priceList: PriceMap): Int = {
-    val sum = productList.foldLeft(0){ (acc, el) =>
+  case class SubTotal(sum: Int, prodNotInPrice: List[String])
+  def getSubTotal(productList: InputMap, priceList: PriceMap): SubTotal = {
+    productList.foldLeft(SubTotal(0, List[String]())){ (acc, el) =>
       val (prod, cnt) = el
-      acc + (cnt * priceList(prod))
+      priceList.get(prod) match{
+        case Some(p) => acc.copy(sum = acc.sum + (cnt * p))
+        case None    => acc.copy(prodNotInPrice = s"Product in basket is not in price list: $prod" :: acc.prodNotInPrice)
+      }
     }
-    sum
   }
 
   def getTotal(subTotal: Int, discounts: List[Option[Discount]]): Int = {

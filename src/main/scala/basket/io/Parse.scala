@@ -9,39 +9,39 @@ object Parse {
     def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
   }
 
-  def csvToPromotions(args: List[String]): List[Promotion] = {
-    args.foldLeft(List[Option[Promotion]]())(
+  case class ParsedPromotions(parsed: List[Promotion], invalid: List[String])
+  def csvToPromotions(args: List[String]): ParsedPromotions = {
+    args.foldLeft(ParsedPromotions(List[Promotion](), List[String]()))(
       (acc, el) => {
-        val newProm: Option[Promotion] = el match {
-          case r"SimplePromotion,(\w*)${prod},(\d{4}-\d{2}-\d{2})${date},(\d*)${percentage}" => Some(SimplePromotion(prod, Some(java.time.LocalDate.parse(date)), percentage.toInt))
-          case r"ConditionalPromotion,(\w*)${prod},(\d*)${prodCnt},(\w*)${promProd},(\d*)${promProdCnt},(\d*)${percentage}" => Some(ConditionalPromotion(prod, prodCnt.toInt, promProd, promProdCnt.toInt, percentage.toInt))
-          case s:String => {
-            println(s"warning: promotions file contained invalid row which will be ignored: $s")
-            None
-          }
+        el match {
+          case r"SimplePromotion,(\w*)${prod},(\d{4}-\d{2}-\d{2})${date},(\d*)${percentage}" => acc.copy(parsed = SimplePromotion(prod, Some(java.time.LocalDate.parse(date)), percentage.toInt) :: acc.parsed)
+          case r"ConditionalPromotion,(\w*)${prod},(\d*)${prodCnt},(\w*)${promProd},(\d*)${promProdCnt},(\d*)${percentage}" =>acc.copy(parsed = ConditionalPromotion(prod, prodCnt.toInt, promProd, promProdCnt.toInt, percentage.toInt) :: acc.parsed)
+          case s:String => acc.copy(invalid = s"Invalid promotion in file: $s" :: acc.invalid)
         }
-        newProm :: acc
       }
-    ).flatten
+    )
   }
 
-  def csvToMapPrice(args: List[String]): PriceMap = {
-    args.foldLeft(Map[String, Int]())(
+  case class ParsedPriceList(parsed: PriceMap, invalid: List[String])
+  def csvToMapPrice(args: List[String]): ParsedPriceList = {
+    args.foldLeft(ParsedPriceList(Map[String, Int](), List[String]()))(
       (acc, el) => {
-        val newPrice = el match {
-          case r"(\w*)${prod},(\d*)${price}" => Some(prod -> price.toInt)
-          case s:String => {
-            println(s"warning: price list file contained invalid row which will be ignored: $s")
-            None
-          }
+        el match {
+          case r"(\w*)${prod},(\d*)${price}" => acc.copy(parsed = acc.parsed + (prod -> price.toInt))
+          case s:String => acc.copy(invalid = s"Invalid product price in file: $s" :: acc.invalid)
         }
-        (for(el <- newPrice) yield acc + el).getOrElse(acc)
       }
     )
   }
 
   def inputToMapCnt(args: Array[String]): InputMap = {
-    args.foldLeft(Map[String, Int]())( (acc, el) => {acc + (el -> (acc.getOrElse(el, 0) + 1))})
+    if (args(0) == "PriceBasket"){
+      args.tail.foldLeft(Map[String, Int]())( (acc, el) => {
+        acc + (el -> (acc.getOrElse(el, 0) + 1))
+      })
+    }else{
+      Map[String, Int]()
+    }
   }
 }
 
