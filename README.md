@@ -14,7 +14,7 @@ Building & Running
 ### Installation & Launch
 
 * clone repo
-* open cmd and cd to root folder of cloned repo (could be for example: ShoppingBasket)
+* open cmd and "cd" to root folder of cloned repo (could be for example: ShoppingBasket)
 * run sbt command (it should load global plugins, project definition, settings for ShoppingBasket project)
 * after you see "sbt:shopping-basket>" command prompt - type: "package" as shown below
 * sbt:shopping-basket> package
